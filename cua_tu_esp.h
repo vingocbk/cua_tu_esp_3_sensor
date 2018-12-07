@@ -43,7 +43,7 @@
 
 ESP8266WebServer server(HTTP_PORT);
 
-IPAddress ip(10, 10, 9, 151); // where xx is the desired IP Address
+IPAddress ip(10, 10, 9, 158); // where xx is the desired IP Address
 IPAddress gateway(10, 10, 9, 1); // set gateway to match your network
 IPAddress subnet(255, 255, 255, 0); // set subnet mask to match your network
 

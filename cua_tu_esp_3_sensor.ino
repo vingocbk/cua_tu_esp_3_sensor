@@ -115,19 +115,19 @@ void inputSpeed(){
     }else{
         countPulFG--;
     }
-    //ECHOLN(countPulFG);
+    ECHOLN(countPulFG);
 }
 
 void caculateSpeed(){
-    ECHOLN("speed");
+    //ECHOLN("speed");
     if(timecaculateSpeed <= 10){
         timecaculateSpeed++;
     }
     pul = countPulFG;
     speed = (pul - prepul)/(0.1*6);
     prepul = pul;
-    ECHO("van toc: ");
-    ECHOLN(speed);
+    //ECHO("van toc: ");
+    //ECHOLN(speed);
     if(abs(speed) <= MINSPEED && timecaculateSpeed >= 3){
         ECHOLN("Da dung lai");
         tickerCaculateSepeed.stop();
@@ -182,7 +182,7 @@ void setpwmStopMotor(){
         SetPWMStopSpeed.stop();
         delay(100);
         digitalWrite(PWM, LOW);
-        delay(100);
+        delay(300);
         count_stop_motor = 0;
         statusStop = true;
         daytay = true;
@@ -284,10 +284,10 @@ void setup() {
     testWifi();
     StartNormalSever();
 
-    attachInterrupt(digitalPinToInterrupt(hallSensor1), dirhallSensor1, FALLING);
-    attachInterrupt(digitalPinToInterrupt(hallSensor2), dirhallSensor2, FALLING);
+    attachInterrupt(digitalPinToInterrupt(hallSensor1), dirhallSensor1, RISING);
+    attachInterrupt(digitalPinToInterrupt(hallSensor2), dirhallSensor2, RISING);
     attachInterrupt(digitalPinToInterrupt(inputFG), inputSpeed, FALLING);
-    attachInterrupt(digitalPinToInterrupt(BUTTON), dirhallSensor3, FALLING);
+    attachInterrupt(digitalPinToInterrupt(BUTTON), dirhallSensor3, RISING);
 }
 
 
@@ -318,23 +318,23 @@ void loop() {
 
 }
 void dirhallSensor1(){      //nhan du lieu tu cam bien ben ngoai
-//    ECHOLN("1");
+    //ECHOLN("1");
       if(daytay == true && statusStop == true){
-          ECHOLN("1");
-          if(countHall3 == true){
+          //ECHOLN("1");
+          if(countHall2 == true){
               //cho dong co chay thuan
               countHall1 = false;
               countHall2 = false;
               countHall3 = false;
-              ECHOLN("thuan");
+              //ECHOLN("open");
               OpenClick();
           }
-          else if(countHall2 == true){
+          else if(countHall3 == true){
               //cho dong co chay nghich
               countHall1 = false;
               countHall2 = false;
               countHall3 = false;
-              ECHOLN("nghich");
+              //ECHOLN("close");
               CloseClick();
           }
           else{
@@ -344,23 +344,23 @@ void dirhallSensor1(){      //nhan du lieu tu cam bien ben ngoai
 }
 
 void dirhallSensor2(){
-//    ECHOLN("2");
+    //ECHOLN("2");
       if(daytay == true && statusStop == true){
-          ECHOLN("2");
-          if(countHall1 == true){
+          //ECHOLN("2");
+          if(countHall3 == true){
               //cho dong co chay thuan
               countHall1 = false;
               countHall2 = false;
               countHall3 = false;
-              ECHOLN("thuan");
+              //ECHOLN("open");
               OpenClick();
           }
-          else if(countHall3 == true){
+          else if(countHall1 == true){
               //cho dong co chay nghich
               countHall1 = false;
               countHall2 = false;
               countHall3 = false;
-              ECHOLN("nghich");
+              //ECHOLN("close");
               CloseClick();
           }
           else{
@@ -369,23 +369,23 @@ void dirhallSensor2(){
       }
 }
 void dirhallSensor3(){
-//    ECHOLN("3");
+    //ECHOLN("3");
       if(daytay == true && statusStop == true){
-          ECHOLN("3");
-          if(countHall2 == true){
+          //ECHOLN("3");
+          if(countHall1 == true){
               //cho dong co chay thuan
               countHall1 = false;
               countHall2 = false;
               countHall3 = false;
-              ECHOLN("thuan");
+              //ECHOLN("open");
               OpenClick();
           }
-          else if(countHall1 == true){
+          else if(countHall2 == true){
               //cho dong co chay nghich
               countHall1 = false;
               countHall2 = false;
               countHall3 = false;
-              ECHOLN("nghich");
+              //ECHOLN("close");
               CloseClick();
           }
           else{
