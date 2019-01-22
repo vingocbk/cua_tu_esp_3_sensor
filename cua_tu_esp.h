@@ -8,13 +8,16 @@
 #include "EEPROM.h"
 
 
-#define hallSensor1 13  //16
-#define hallSensor2 D5  //14
+#define hallSensor1 4  //16
+#define hallSensor2 5  //14
+#define hallSensor3 13
+#define ledTestWifi 2
 #define inputFG 12
-#define PWM 4
-#define BUTTON 2
+#define PWM 14
+#define DIR 16
+#define BUTTON 15
+
 #define SCALE 0.95
-#define DIR 5
 #define MINSPEED 8
 #define CONFIG 0
 
@@ -24,8 +27,9 @@
 #define EEPROM_WIFI_MAX_CLEAR 512
 #define EEPROM_WIFI_PASS_START 33
 #define EEPROM_WIFI_PASS_END 64
-#define EEPROM_WIFI_IP_START 65
+#define EEPROM_WIFI_IP_START 65 
 #define EEPROM_WIFI_IP_END 95
+#define EEPROM_SET_MODE_RUN_BEGIN 100
 
 
 #define SSID_PRE_AP_MODE "AvyInterior-"
@@ -55,6 +59,8 @@ IPAddress subnet(255, 255, 255, 0); // set subnet mask to match your network
 
 
 int countPulFG = 0;
+int countPulFGDistant = 0;
+int setmoderunbegin = 1; // cham nhat
 uint32_t countPulDistant;                                 
 uint8_t countSetPwm = 0;        //bien nay co tac dung dieu chinh toc do dong co
 uint32_t countTime = 0;          //tinh thoi gian, timer 2 la 10us, vi the 100ms bien nay se co gia tri la 10.000
@@ -71,6 +77,15 @@ bool daytay = true;
 int start_count_hall_sensor = 0;    //bat dau den 2 thi moi tinh day tay
 uint8_t countFrirstRun = 0;  //dem so lan va cham
 uint32_t count_stop_motor = 0;
+int stop_dau = 0;           //gia tri set cho khoang dung lai
+int stop_cuoi = 0;
+int loai_bien_giong_nhau_cua_cam_bien = 0;
+int luu_trang_thai_cua_sensor_ngay_khi_dung_lai = 0;
+
+void handleOk();
+void handleRoot();
+void getStatus();
+void setModeRunBegin();
 void inputSpeed();
 void dirhallSensor1();
 void dirhallSensor2();
@@ -88,6 +103,7 @@ void CloseClick();
 void Stop();
 void StopClick();
 void setpwmStopMotor();
+void inputDistant();        //doc quang duong
 
 
 //Ticker tickerSetApMode(setLedApMode, 200, 0);   //every 200ms
