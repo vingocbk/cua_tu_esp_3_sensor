@@ -74,9 +74,13 @@ bool modeFast = false;
 bool Forward = true;    //chieu quay thuan
 bool fristRun = true;   //kiem tra lan chay dau tinh khoang cach chieu dai tu
 bool daytay = true;
+bool Flag_Normal_Mode = true;
 int start_count_hall_sensor = 0;    //bat dau den 2 thi moi tinh day tay
+int count_number_of_click = 0;      //click 5 lan thi chuyen mode
 uint8_t countFrirstRun = 0;  //dem so lan va cham
 uint32_t count_stop_motor = 0;
+uint32_t time_click_button = 0;
+uint32_t pre_time_click_button = 0;
 int stop_dau = 0;           //gia tri set cho khoang dung lai
 int stop_cuoi = 0;
 int loai_bien_giong_nhau_cua_cam_bien = 0;
@@ -104,9 +108,13 @@ void Stop();
 void StopClick();
 void setpwmStopMotor();
 void inputDistant();        //doc quang duong
+void setLedApMode();
+void setupConfigMode();
+String GetFullSSID();
 
 
 //Ticker tickerSetApMode(setLedApMode, 200, 0);   //every 200ms
 Ticker tickerCaculateSepeed(caculateSpeed, 100);   //every 200ms
 Ticker SetPWMspeed(setpwmMotor, 10, 0, MICROS_MICROS);
 Ticker SetPWMStopSpeed(setpwmStopMotor, 10, 0, MICROS_MICROS);
+Ticker tickerSetApMode(setLedApMode, 200, 0);   //every 200ms
