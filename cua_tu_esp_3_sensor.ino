@@ -22,6 +22,17 @@ void getStatus(){
 
 }
 
+void resetDistant(){
+    server.send(200, "text/html", "{\"status\":\"ok\"}");
+    EEPROM.write(EEPROM_DISTANT, 0);
+    EEPROM.commit();
+    countPulFGDistant = 0;
+    isSaveDistant = false;
+    fristRun = true;
+    countFrirstRun = 0;
+    ECHOLN("resetDistant");
+}
+
 void setModeRunBegin(){
     server.send(200, "application/json; charset=utf-8", "{\"status\":\"success\"}");
     StaticJsonBuffer<RESPONSE_LENGTH> jsonBuffer;
@@ -211,28 +222,43 @@ void caculateSpeed(){
         digitalWrite(PWM, LOW);
         statusStop = false;
 
-        if(fristRun == false && countPulFGDistant <= 3){
-            countPulFGDistant = 0;
-        }else if(fristRun == false && (countPulDistant -3) <= countPulFGDistant){
-            countPulFGDistant = countPulDistant;
-        }
+        
 
+        if(isSaveDistant == true && fristRun == true){
+            fristRun = false;
+            countPulFGDistant = 0;
+            prepul = 0;
+        }
+        
 
 
         if(fristRun == true && countFrirstRun < 5){
             countFrirstRun++;
         }
+        
         if(fristRun == true && countFrirstRun == 1){
             countPulFGDistant = 0;
             prepul = 0;
         }
         else if(fristRun == true && countFrirstRun == 2){
             countPulDistant = abs(countPulFGDistant);
+            EEPROM.write(EEPROM_DISTANT, countPulDistant);
+            EEPROM.commit();
+            isSaveDistant = true;
             if(countPulFGDistant < 0){
                 countPulFGDistant = 0;
                 prepul = 0;
             }
             fristRun = false;
+        }
+
+
+
+
+        if(fristRun == false && countPulFGDistant <= 3){
+            countPulFGDistant = 0;
+        }else if(fristRun == false && (countPulDistant -3) <= countPulFGDistant){
+            countPulFGDistant = countPulDistant;
         }
 
         
@@ -369,12 +395,14 @@ void StartNormalSever(){
     server.on("/open", HTTP_GET, Open);
     server.on("/close", HTTP_GET, Close);
     server.on("/stop", HTTP_GET, Stop);
+    server.on("/resetdistant", HTTP_GET, resetDistant);
     server.on("/", HTTP_OPTIONS, handleOk);
     server.on("/getstatus", HTTP_OPTIONS, getStatus);
     server.on("/setmoderun", HTTP_OPTIONS, setModeRunBegin);
     server.on("/open", HTTP_OPTIONS, handleOk);
     server.on("/close", HTTP_OPTIONS, handleOk);
     server.on("/stop", HTTP_OPTIONS, handleOk);
+    server.on("/resetdistant", HTTP_OPTIONS, handleOk);
     server.begin();
     ECHOLN("HTTP server started");
 }
@@ -451,6 +479,19 @@ void setup() {
     attachInterrupt(digitalPinToInterrupt(inputFG), inputSpeed, FALLING);
     attachInterrupt(digitalPinToInterrupt(hallSensor3), dirhallSensor3, RISING);
     // attachInterrupt(digitalPinToInterrupt(BUTTON), buttonClick, RISING);
+
+    if(EEPROM.read(EEPROM_DISTANT) != 255){
+        isSaveDistant = true;
+        countPulDistant = EEPROM.read(EEPROM_DISTANT);
+        ECHO("Distant = ");
+        ECHOLN(countPulDistant);
+        CloseClick();
+    }else{
+        isSaveDistant = false;
+        ECHOLN("isSaveDistant fasle!");
+    }
+
+
 }
 
 
@@ -483,6 +524,7 @@ void loop() {
 
     if(digitalRead(BUTTON) == HIGH && (time_click_button + CONFIG_HOLD_TIME) <= millis()){
         time_click_button = millis();
+        StopClick();
         digitalWrite(ledTestWifi, HIGH);
         Flag_Normal_Mode = false;
         tickerSetApMode.start();

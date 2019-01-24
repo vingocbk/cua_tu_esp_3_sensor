@@ -30,6 +30,7 @@
 #define EEPROM_WIFI_IP_START 65 
 #define EEPROM_WIFI_IP_END 95
 #define EEPROM_SET_MODE_RUN_BEGIN 100
+#define EEPROM_DISTANT 105
 
 
 #define SSID_PRE_AP_MODE "AvyInterior-"
@@ -75,6 +76,7 @@ bool Forward = true;    //chieu quay thuan
 bool fristRun = true;   //kiem tra lan chay dau tinh khoang cach chieu dai tu
 bool daytay = true;
 bool Flag_Normal_Mode = true;
+bool isSaveDistant = false;
 int start_count_hall_sensor = 0;    //bat dau den 2 thi moi tinh day tay
 int count_number_of_click = 0;      //click 5 lan thi chuyen mode
 uint8_t countFrirstRun = 0;  //dem so lan va cham
@@ -111,6 +113,7 @@ void inputDistant();        //doc quang duong
 void setLedApMode();
 void setupConfigMode();
 String GetFullSSID();
+void resetDistant();
 
 
 //Ticker tickerSetApMode(setLedApMode, 200, 0);   //every 200ms
