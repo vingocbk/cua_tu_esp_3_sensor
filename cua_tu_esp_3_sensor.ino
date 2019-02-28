@@ -14,9 +14,9 @@ void handleRoot() {
 
 void getStatus(){
     if(Forward == true){
-        server.send(200, "text/html", "{\"forward\" : \"close\"}");
+        server.send(200, "text/html", "{\"status\" : \"close\"}");
     }else{
-        server.send(200, "text/html", "{\"forward\" : \"open\"}");
+        server.send(200, "text/html", "{\"status\" : \"open\"}");
     }
     ECHOLN("getstatus");
 
@@ -303,7 +303,11 @@ void setpwmStopMotor(){
         statusStop = true;
         daytay = true;
         if(flag_send_status_when_use_hand == true && Forward == true){      //dang o trang thai dong cua
-            httpclient.begin("http://10.10.9.110:8888/close"); //HTTP
+            String ipsend = "http://";
+            ipsend += eipSend;
+            ipsend += ":8888/close";
+            httpclient.begin(ipsend); //HTTP
+            ECHOLN(ipsend);
             int httpCode = httpclient.GET();
             // httpCode will be negative on error
             if (httpCode > 0) {
@@ -324,7 +328,11 @@ void setpwmStopMotor(){
             flag_send_status_when_use_hand = false;
         }
         else if(flag_send_status_when_use_hand == true && Forward == false){    //dang o trang thai mo cua
-            httpclient.begin("http://10.10.9.110:8888/open"); //HTTP
+            String ipsend = "http://";
+            ipsend += eipSend;
+            ipsend += ":8888/open";
+            httpclient.begin(ipsend); //HTTP
+            ECHOLN(ipsend);
             int httpCode = httpclient.GET();
             // httpCode will be negative on error
             if (httpCode > 0) {
@@ -429,6 +437,15 @@ void SetupNetwork() {
     ECHO("IP: ");
     ECHOLN(eip);
     detachIP(eip);  //tach ip thanh 4 kieu uint8_t
+    eipSend = "";
+    for (int i = EEPROM_WIFI_IP_SEND_START; i < EEPROM_WIFI_IP_SEND_END; ++i){
+        if(char(EEPROM.read(i)) == '\0'){
+            break;
+        }
+        eipSend += char(EEPROM.read(i));
+    }
+    ECHO("IPSEND: ");
+    ECHOLN(eipSend);
     testWifi(esid, epass);
 }
 
@@ -499,7 +516,7 @@ String GetFullSSID() {
 }
 
 
-bool connectToWifi(String nssid, String npass, String ip) {
+bool connectToWifi(String nssid, String npass, String ip, String ipsend) {
     ECHOLN("Open STA....");
     WiFi.softAPdisconnect();
     WiFi.disconnect();
@@ -532,6 +549,14 @@ bool connectToWifi(String nssid, String npass, String ip) {
         for (int i = 0; i < ip.length(); ++i){
             EEPROM.write(i+EEPROM_WIFI_IP_START, ip[i]);             
             ECHO(ip[i]);
+        }
+        ECHOLN("");
+        EEPROM.commit();
+        ECHOLN("writing eeprom IPSEND:");
+        ECHO("Wrote: ");
+        for (int i = 0; i < ipsend.length(); ++i){
+            EEPROM.write(i+EEPROM_WIFI_IP_SEND_START, ipsend[i]);             
+            ECHO(ipsend[i]);
         }
         ECHOLN("");
         EEPROM.commit();
@@ -584,6 +609,7 @@ void ConfigMode(){
     JsonObject& rootData = jsonBuffer.parseObject(server.arg("plain"));
     ECHOLN("--------------");
     tickerSetApMode.stop();
+    digitalWrite(ledTestWifi, HIGH);
     if (rootData.success()) {
         server.sendHeader("Access-Control-Allow-Headers", "*");
         server.sendHeader("Access-Control-Allow-Origin", "*");
@@ -592,6 +618,7 @@ void ConfigMode(){
         String nssid = rootData["ssid"];
         String npass = rootData["password"];
         String ip = rootData["set_ip"];
+        String ipsend = rootData["ip_send"];
 
         detachIP(ip); 
         ECHO("Wifi new name: ");
@@ -606,9 +633,10 @@ void ConfigMode(){
         ECHO(third_octet);
         ECHO(".");
         ECHOLN(fourth_octet);
-        if (connectToWifi(nssid, npass, ip)) {
+        if (connectToWifi(nssid, npass, ip, ipsend)) {
             esid = nssid;
             epass = npass;
+            eipSend = ipsend;
             StartNormalSever();
             Flag_Normal_Mode = true;
             return;

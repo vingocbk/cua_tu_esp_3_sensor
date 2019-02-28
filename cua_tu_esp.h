@@ -32,6 +32,8 @@
 #define EEPROM_WIFI_IP_END 95
 #define EEPROM_SET_MODE_RUN_BEGIN 100
 #define EEPROM_DISTANT 105
+#define EEPROM_WIFI_IP_SEND_START 106
+#define EEPROM_WIFI_IP_SEND_END 150
 
 
 #define SSID_PRE_AP_MODE "AvyInterior-"
@@ -91,7 +93,7 @@ uint8_t second_octet;
 uint8_t third_octet;
 uint8_t fourth_octet;
 
-String esid, epass, eip;
+String esid, epass, eip, eipSend;
 int stop_dau = 0;           //gia tri set cho khoang dung lai
 int stop_cuoi = 0;
 int loai_bien_giong_nhau_cua_cam_bien = 0;
@@ -129,7 +131,7 @@ void setLedApMode();
 void SetupConfigMode();             //phat wifi
 void ConfigMode();                  //nhan data tu app
 void StartConfigServer();           //thiet lap sever
-bool connectToWifi(String nssid, String npass, String ip);
+bool connectToWifi(String nssid, String npass, String ip, String ipsend);
 String GetFullSSID();
 void detachIP(String ip);
 void setupIP();
