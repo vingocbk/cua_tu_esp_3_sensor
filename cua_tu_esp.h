@@ -18,7 +18,7 @@
 #define DIR 16
 #define BUTTON 15
 
-#define SCALE 0.95
+#define SCALE_AUTO 0.95
 #define MINSPEED 8
 #define CONFIG 0
 
@@ -34,6 +34,8 @@
 #define EEPROM_DISTANT 105
 #define EEPROM_WIFI_IP_SEND_START 106
 #define EEPROM_WIFI_IP_SEND_END 150
+#define EEPROM_SET_PERCENT_OUT_LOW_SPEED 151
+#define EEPROM_SET_PERCENT_IN_LOW_SPEED 152
 
 
 #define SSID_PRE_AP_MODE "AvyInterior-"
@@ -72,6 +74,8 @@ uint32_t countTime = 0;          //tinh thoi gian, timer 2 la 10us, vi the 100ms
 uint8_t sau_1_s = 0;
 uint8_t timecaculateSpeed = 0;  //sau 500ms moi bat dau tinh van toc
 int pul, prepul = 0;
+int percentLowSpeedIn = 5;          //gia tri set mac dinh ban dau l 5% moi dau.
+int percentLowSpeedOut = 5;
 float speed;
 bool statusStop = true;     //true la he thong dang dung im, false la he thong dang chuyen dong
 bool countHall1 = false, countHall2 = false, countHall3 = false;
@@ -81,6 +85,7 @@ bool fristRun = true;   //kiem tra lan chay dau tinh khoang cach chieu dai tu
 bool daytay = true;
 bool Flag_Normal_Mode = true;
 bool isSaveDistant = false;
+bool isSavePercentLowSpeed = false;
 bool flag_send_status_when_use_hand = false;
 int start_count_hall_sensor = 0;    //bat dau den 2 thi moi tinh day tay
 int count_number_of_click = 0;      //click 5 lan thi chuyen mode
@@ -104,6 +109,7 @@ void handleOk();
 void handleRoot();
 void getStatus();
 void setModeRunBegin();
+void setPercentLowSpeed();
 void inputSpeed();
 void dirhallSensor1();
 void dirhallSensor2();

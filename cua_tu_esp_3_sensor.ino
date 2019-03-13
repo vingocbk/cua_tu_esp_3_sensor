@@ -55,6 +55,28 @@ void setModeRunBegin(){
     }
 }
 
+
+void setPercentLowSpeed(){
+    server.send(200, "application/json; charset=utf-8", "{\"status\":\"success\"}");
+    StaticJsonBuffer<RESPONSE_LENGTH> jsonBuffer;
+    ECHOLN(server.arg("plain"));
+    JsonObject& rootData = jsonBuffer.parseObject(server.arg("plain"));
+    ECHOLN("--------------");
+    if (rootData.success()){
+        String setpercentoutstr = rootData["setpercentout"];
+        String setpercentinstr = rootData["setpercentin"];
+        percentLowSpeedIn = setpercentinstr.toInt();
+        percentLowSpeedOut = setpercentoutstr.toInt();
+        ECHO("Writed: ");
+        ECHO(percentLowSpeedOut);
+        ECHO(",");
+        ECHOLN(percentLowSpeedIn);
+        EEPROM.write(EEPROM_SET_PERCENT_OUT_LOW_SPEED, char(percentLowSpeedOut));
+        EEPROM.write(EEPROM_SET_PERCENT_IN_LOW_SPEED, char(percentLowSpeedIn));
+        EEPROM.commit();
+    }
+}
+
 void Open(){
     server.send(200, "text/html", "{\"status\":\"open\"}");
     ECHOLN("open");
@@ -368,7 +390,7 @@ void setpwmMotor(){
             }
         }else{                //ti le PWM la 1 HIGH 3 LOWset
             digitalWrite(PWM, HIGH);
-        } 
+        }
     }
     else if(setmoderunbegin == 2){
         if(modeFast == false){ //ti le PWM la 3 HIGH 1 LOW
@@ -486,6 +508,7 @@ void StartNormalSever(){
     server.on("/", HTTP_GET, handleRoot);
     server.on("/getstatus", HTTP_GET, getStatus);
     server.on("/setmoderun", HTTP_POST, setModeRunBegin);
+    server.on("/setlowspeed", HTTP_POST, setPercentLowSpeed);
     server.on("/open", HTTP_GET, Open);
     server.on("/close", HTTP_GET, Close);
     server.on("/stop", HTTP_GET, Stop);
@@ -493,6 +516,7 @@ void StartNormalSever(){
     server.on("/", HTTP_OPTIONS, handleOk);
     server.on("/getstatus", HTTP_OPTIONS, getStatus);
     server.on("/setmoderun", HTTP_OPTIONS, setModeRunBegin);
+    server.on("/setlowspeed", HTTP_OPTIONS, setPercentLowSpeed);
     server.on("/open", HTTP_OPTIONS, handleOk);
     server.on("/close", HTTP_OPTIONS, handleOk);
     server.on("/stop", HTTP_OPTIONS, handleOk);
@@ -741,6 +765,20 @@ void setup() {
         ECHOLN("isSaveDistant fasle!");
     }
 
+    if(EEPROM.read(EEPROM_SET_PERCENT_OUT_LOW_SPEED) != 255 && EEPROM.read(EEPROM_SET_PERCENT_OUT_LOW_SPEED) != 0
+        && EEPROM.read(EEPROM_SET_PERCENT_IN_LOW_SPEED) != 255 && EEPROM.read(EEPROM_SET_PERCENT_IN_LOW_SPEED) != 0){
+        isSavePercentLowSpeed = true;
+        percentLowSpeedIn = EEPROM.read(EEPROM_SET_PERCENT_IN_LOW_SPEED);
+        ECHO("percentLowSpeedIn = ");
+        ECHOLN(percentLowSpeedIn);
+
+        percentLowSpeedOut = EEPROM.read(EEPROM_SET_PERCENT_OUT_LOW_SPEED);
+        ECHO("percentLowSpeedOut = ");
+        ECHOLN(percentLowSpeedOut);
+    }else{
+        isSavePercentLowSpeed = false;
+        ECHOLN("isSavePercentLowSpeed fasle!");
+    }
 
 }
 
@@ -751,9 +789,10 @@ void loop() {
     tickerupdate();
     server.handleClient();
 
-    if(fristRun == false && Forward == true && countPulFGDistant < SCALE*countPulDistant){
+    // ECHOLN(countPulFGDistant > (percentLowSpeedOut/100)*countPulDistant);
+    if(fristRun == false && Forward == true && countPulFGDistant < ((100 - (float)percentLowSpeedOut)/100)*countPulDistant){
         modeFast = true;
-    }else if(fristRun == false && Forward == false && countPulFGDistant > (1-SCALE)*countPulDistant){
+    }else if(fristRun == false && Forward == false && countPulFGDistant > ((float)percentLowSpeedIn/100)*countPulDistant){
         modeFast = true;       
     }else{
         modeFast = false;
@@ -798,7 +837,7 @@ void dirhallSensor1(){      //nhan du lieu tu cam bien ben ngoai
     // }
     if(loai_bien_giong_nhau_cua_cam_bien != 1){
         loai_bien_giong_nhau_cua_cam_bien = 1;
-        // ECHOLN("1");
+         ECHOLN("1");
 
         // if(Forward == true){
         //     countPulFGDistant++;
@@ -847,7 +886,7 @@ void dirhallSensor2(){
 
     if(loai_bien_giong_nhau_cua_cam_bien != 2){
         loai_bien_giong_nhau_cua_cam_bien = 2;
-        // ECHOLN("2");
+         ECHOLN("2");
         
         if(Forward == true){
             countPulFGDistant++;
@@ -894,7 +933,7 @@ void dirhallSensor3(){
 
     if(loai_bien_giong_nhau_cua_cam_bien != 3){
         loai_bien_giong_nhau_cua_cam_bien = 3;
-        // ECHOLN("3");
+         ECHOLN("3");
 
         // if(Forward == true){
         //     countPulFGDistant++;
