@@ -322,6 +322,8 @@ void setpwmStopMotor(){
         // ECHOLN(luu_trang_thai_cua_sensor_ngay_khi_dung_lai);
         loai_bien_giong_nhau_cua_cam_bien = 0;
         count_stop_motor = 0;
+
+
         statusStop = true;
         daytay = true;
         if(flag_send_status_when_use_hand == true && Forward == true){      //dang o trang thai dong cua
@@ -348,6 +350,9 @@ void setpwmStopMotor(){
             }
             httpclient.end();
             flag_send_status_when_use_hand = false;
+
+
+            
         }
         else if(flag_send_status_when_use_hand == true && Forward == false){    //dang o trang thai mo cua
             String ipsend = "http://";
@@ -374,6 +379,11 @@ void setpwmStopMotor(){
             httpclient.end();
             flag_send_status_when_use_hand = false;
         }
+        //reset lai vi tri cua button analog
+        flag_reset_value_analog = true;
+        // valueAnalogRead = analogRead(ANALOGREADBUTTON);
+        // prevalueAnalogRead = valueAnalogRead;
+        
     }
     
 }
@@ -780,6 +790,8 @@ void setup() {
         ECHOLN("isSavePercentLowSpeed fasle!");
     }
 
+    valueAnalogRead = analogRead(ANALOGREADBUTTON);
+    prevalueAnalogRead = valueAnalogRead;
 }
 
 
@@ -823,11 +835,30 @@ void loop() {
         StartConfigServer();
     }
 
+    //reset_value_analog
+    //flag_reset_value_analog dung de reset lai gia tri bien tro: pre = current
+    //flag = true thi se reset, con bang false la da reset roi, vi the load gia tri phai la bang false
+    if(flag_reset_value_analog == true){
+        valueAnalogRead = analogRead(ANALOGREADBUTTON);
+        prevalueAnalogRead = valueAnalogRead;
+        flag_reset_value_analog = false;
+    }
+
+    //analogRead
+    if(flag_reset_value_analog == false && statusStop == true && Forward == true && abs(millis() - time_check_analog_pin) > TIME_CHECK_ANALOG){
+        time_check_analog_pin = millis();
+        valueAnalogRead = analogRead(ANALOGREADBUTTON);
+        if(abs(valueAnalogRead - prevalueAnalogRead) > VALUE_ERROR_ANALOG){
+            prevalueAnalogRead = valueAnalogRead;
+            OpenClick();
+        }
+    }
+
 
 }
 void dirhallSensor1(){      //nhan du lieu tu cam bien ben ngoai
     // if(daytay == true && statusStop == true && luu_trang_thai_cua_sensor_ngay_khi_dung_lai == 2){
-    //     ECHOLN("true1");
+//         ECHOLN("true1");
     //     Forward = true;
     //     luu_trang_thai_cua_sensor_ngay_khi_dung_lai = 0;
     // }else if(daytay == true && statusStop == true && luu_trang_thai_cua_sensor_ngay_khi_dung_lai == 3){
@@ -874,7 +905,7 @@ void dirhallSensor1(){      //nhan du lieu tu cam bien ben ngoai
 
 void dirhallSensor2(){
     // if(daytay == true && statusStop == true && luu_trang_thai_cua_sensor_ngay_khi_dung_lai == 3){
-    //     ECHOLN("true2");
+//         ECHOLN("true2");
     //     Forward = true;
     //     luu_trang_thai_cua_sensor_ngay_khi_dung_lai = 0;
     // }else if(daytay == true && statusStop == true && luu_trang_thai_cua_sensor_ngay_khi_dung_lai == 1){
@@ -922,7 +953,7 @@ void dirhallSensor2(){
 }
 void dirhallSensor3(){
     // if(daytay == true && statusStop == true && luu_trang_thai_cua_sensor_ngay_khi_dung_lai == 1){
-    //     ECHOLN("true3");
+//         ECHOLN("true3");
     //     Forward = true;
     //     luu_trang_thai_cua_sensor_ngay_khi_dung_lai = 0;
     // }else if(daytay == true && statusStop == true && luu_trang_thai_cua_sensor_ngay_khi_dung_lai == 2){

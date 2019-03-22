@@ -17,6 +17,7 @@
 #define PWM 14
 #define DIR 16
 #define BUTTON 15
+#define ANALOGREADBUTTON A0
 
 #define SCALE_AUTO 0.95
 #define MINSPEED 8
@@ -49,7 +50,9 @@
 
 //#define SSID "hpt cnc"
 //#define PASS "hpt12345"
-#define CONFIG_HOLD_TIME 3000
+#define CONFIG_HOLD_TIME 5000
+#define TIME_CHECK_ANALOG 500
+#define VALUE_ERROR_ANALOG 100
 
 HTTPClient httpclient;
 ESP8266WebServer server(HTTP_PORT);
@@ -87,11 +90,13 @@ bool Flag_Normal_Mode = true;
 bool isSaveDistant = false;
 bool isSavePercentLowSpeed = false;
 bool flag_send_status_when_use_hand = false;
+bool flag_reset_value_analog = false;
 int start_count_hall_sensor = 0;    //bat dau den 2 thi moi tinh day tay
 int count_number_of_click = 0;      //click 5 lan thi chuyen mode
 uint8_t countFrirstRun = 0;  //dem so lan va cham
 uint32_t count_stop_motor = 0;
 uint32_t time_click_button = 0;
+uint32_t time_check_analog_pin = 0;
 uint32_t pre_time_click_button = 0;
 uint8_t first_octet;
 uint8_t second_octet;
@@ -103,6 +108,9 @@ int stop_dau = 0;           //gia tri set cho khoang dung lai
 int stop_cuoi = 0;
 int loai_bien_giong_nhau_cua_cam_bien = 0;
 int luu_trang_thai_cua_sensor_ngay_khi_dung_lai = 0;
+
+int valueAnalogRead = 0;
+int prevalueAnalogRead = 0;
 
 //normal mode
 void handleOk();
