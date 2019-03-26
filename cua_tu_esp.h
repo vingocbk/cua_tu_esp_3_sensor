@@ -37,7 +37,7 @@
 #define EEPROM_WIFI_IP_SEND_END 150
 #define EEPROM_SET_PERCENT_OUT_LOW_SPEED 151
 #define EEPROM_SET_PERCENT_IN_LOW_SPEED 152
-
+#define EEPROM_SET_TIME_RETURN 153
 
 #define SSID_PRE_AP_MODE "AvyInterior-"
 #define PASSWORD_AP_MODE "123456789"
@@ -106,6 +106,7 @@ uint8_t fourth_octet;
 String esid, epass, eip, eipSend;
 int stop_dau = 0;           //gia tri set cho khoang dung lai
 int stop_cuoi = 0;
+int time_return = 10;        //10 *10ms;
 int loai_bien_giong_nhau_cua_cam_bien = 0;
 int luu_trang_thai_cua_sensor_ngay_khi_dung_lai = 0;
 
@@ -137,6 +138,7 @@ void StopClick();
 void setpwmStopMotor();
 void inputDistant();        //doc quang duong
 void resetDistant();
+void setTimeReturn();
 void SetupNomalMode();
 void SetupNetwork();
 

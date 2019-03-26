@@ -77,6 +77,23 @@ void setPercentLowSpeed(){
     }
 }
 
+
+void setTimeReturn(){
+    server.send(200, "application/json; charset=utf-8", "{\"status\":\"success\"}");
+    StaticJsonBuffer<RESPONSE_LENGTH> jsonBuffer;
+    ECHOLN(server.arg("plain"));
+    JsonObject& rootData = jsonBuffer.parseObject(server.arg("plain"));
+    ECHOLN("--------------");
+    if (rootData.success()){
+        String timeReturnstr = rootData["timereturn"];
+        time_return = timeReturnstr.toInt();
+        ECHO("Writed: ");
+        ECHO(time_return);
+        EEPROM.write(EEPROM_SET_TIME_RETURN, char(time_return));
+        EEPROM.commit();
+    }
+}
+
 void Open(){
     server.send(200, "text/html", "{\"status\":\"open\"}");
     ECHOLN("open");
@@ -313,11 +330,11 @@ void setpwmStopMotor(){
         digitalWrite(PWM, LOW);
         //countSetPwm = 0;
     }
-    if(count_stop_motor >= 30000){        
+    if(count_stop_motor >= time_return*1000){       //time_return *10 ms      
         SetPWMStopSpeed.stop();
-        delay(100);
+        // delay(100);
         digitalWrite(PWM, LOW);
-        delay(300);
+        delay(100);
         luu_trang_thai_cua_sensor_ngay_khi_dung_lai = loai_bien_giong_nhau_cua_cam_bien;
         // ECHOLN(luu_trang_thai_cua_sensor_ngay_khi_dung_lai);
         loai_bien_giong_nhau_cua_cam_bien = 0;
@@ -519,14 +536,16 @@ void StartNormalSever(){
     server.on("/getstatus", HTTP_GET, getStatus);
     server.on("/setmoderun", HTTP_POST, setModeRunBegin);
     server.on("/setlowspeed", HTTP_POST, setPercentLowSpeed);
+    server.on("/settimereturn", HTTP_POST, setTimeReturn);
     server.on("/open", HTTP_GET, Open);
     server.on("/close", HTTP_GET, Close);
     server.on("/stop", HTTP_GET, Stop);
     server.on("/resetdistant", HTTP_GET, resetDistant);
     server.on("/", HTTP_OPTIONS, handleOk);
-    server.on("/getstatus", HTTP_OPTIONS, getStatus);
-    server.on("/setmoderun", HTTP_OPTIONS, setModeRunBegin);
-    server.on("/setlowspeed", HTTP_OPTIONS, setPercentLowSpeed);
+    server.on("/getstatus", HTTP_OPTIONS, handleOk);
+    server.on("/setmoderun", HTTP_OPTIONS, handleOk);
+    server.on("/setlowspeed", HTTP_OPTIONS, handleOk);
+    server.on("/settimereturn", HTTP_OPTIONS, handleOk);
     server.on("/open", HTTP_OPTIONS, handleOk);
     server.on("/close", HTTP_OPTIONS, handleOk);
     server.on("/stop", HTTP_OPTIONS, handleOk);
@@ -775,6 +794,16 @@ void setup() {
         ECHOLN("isSaveDistant fasle!");
     }
 
+    if(EEPROM.read(EEPROM_SET_TIME_RETURN) != 255 && EEPROM.read(EEPROM_SET_TIME_RETURN) != 0){
+        time_return = EEPROM.read(EEPROM_SET_TIME_RETURN);
+        ECHO("time_return = ");
+        ECHO(time_return);
+        ECHOLN("0 (ms)");
+    }else{
+        time_return = 10;
+        ECHOLN("isSetTimeReurn fasle, auto set 100(ms)");
+    }
+
     if(EEPROM.read(EEPROM_SET_PERCENT_OUT_LOW_SPEED) != 255 && EEPROM.read(EEPROM_SET_PERCENT_OUT_LOW_SPEED) != 0
         && EEPROM.read(EEPROM_SET_PERCENT_IN_LOW_SPEED) != 255 && EEPROM.read(EEPROM_SET_PERCENT_IN_LOW_SPEED) != 0){
         isSavePercentLowSpeed = true;
@@ -834,6 +863,8 @@ void loop() {
         SetupConfigMode();
         StartConfigServer();
     }
+
+
 
     //reset_value_analog
     //flag_reset_value_analog dung de reset lai gia tri bien tro: pre = current
