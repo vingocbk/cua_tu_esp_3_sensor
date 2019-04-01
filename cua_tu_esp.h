@@ -31,10 +31,11 @@
 #define EEPROM_WIFI_PASS_END 64
 #define EEPROM_WIFI_IP_START 65 
 #define EEPROM_WIFI_IP_END 95
-#define EEPROM_SET_MODE_RUN_BEGIN 100
-#define EEPROM_DISTANT 105
-#define EEPROM_WIFI_IP_SEND_START 106
-#define EEPROM_WIFI_IP_SEND_END 150
+#define EEPROM_WIFI_IP_SEND_START 96
+#define EEPROM_WIFI_IP_SEND_END 148
+#define EEPROM_SET_MODE_RUN_BEGIN 149
+#define EEPROM_DISTANT 150
+
 #define EEPROM_SET_PERCENT_OUT_LOW_SPEED 151
 #define EEPROM_SET_PERCENT_IN_LOW_SPEED 152
 #define EEPROM_SET_TIME_RETURN 153
@@ -155,7 +156,7 @@ void setupIP();
 
 
 //Ticker tickerSetApMode(setLedApMode, 200, 0);   //every 200ms
-Ticker tickerCaculateSepeed(caculateSpeed, 100);   //every 200ms
+Ticker tickerCaculateSpeed(caculateSpeed, 100);   //every 200ms
 Ticker SetPWMspeed(setpwmMotor, 10, 0, MICROS_MICROS);
 Ticker SetPWMStopSpeed(setpwmStopMotor, 10, 0, MICROS_MICROS);
 Ticker tickerSetApMode(setLedApMode, 200, 0);   //every 200ms

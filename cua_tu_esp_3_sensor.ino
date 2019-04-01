@@ -102,7 +102,7 @@ void Open(){
     daytay = false;
     digitalWrite(DIR, HIGH);
     SetPWMspeed.start();
-    tickerCaculateSepeed.start();
+    tickerCaculateSpeed.start();
 }
 void OpenClick(){
     ECHOLN("open_click");
@@ -111,7 +111,7 @@ void OpenClick(){
     daytay = false;
     digitalWrite(DIR, HIGH);
     SetPWMspeed.start();
-    tickerCaculateSepeed.start();
+    tickerCaculateSpeed.start();
 }
 
 void Close(){
@@ -122,7 +122,7 @@ void Close(){
     daytay = false;
     digitalWrite(DIR, LOW);
     SetPWMspeed.start();
-    tickerCaculateSepeed.start();
+    tickerCaculateSpeed.start();
 }
 
 void CloseClick(){
@@ -132,13 +132,13 @@ void CloseClick(){
     daytay = false;
     digitalWrite(DIR, LOW);
     SetPWMspeed.start();
-    tickerCaculateSepeed.start();
+    tickerCaculateSpeed.start();
 }
 
 void Stop(){
     ECHOLN("Stop");
     server.send(200, "text/html", "{\"status\":\"stop\"}");
-    tickerCaculateSepeed.stop();
+    tickerCaculateSpeed.stop();
     SetPWMspeed.stop();
     digitalWrite(PWM, LOW);
     delay(200);
@@ -157,7 +157,7 @@ void Stop(){
 
 void StopClick(){
     ECHOLN("Stop_click");
-    tickerCaculateSepeed.stop();
+    tickerCaculateSpeed.stop();
     SetPWMspeed.stop();
     digitalWrite(PWM, LOW);
     delay(200);
@@ -256,7 +256,7 @@ void caculateSpeed(){
     //ECHOLN(speed);
     if(abs(speed) <= MINSPEED && timecaculateSpeed >= 3){   //sau 3 lan chay thi moi tinh den van toc
         ECHOLN("Da dung lai");
-        tickerCaculateSepeed.stop();
+        tickerCaculateSpeed.stop();
         SetPWMspeed.stop(); 
         digitalWrite(PWM, LOW);
         statusStop = false;
@@ -449,7 +449,7 @@ void setpwmMotor(){
 
 void tickerupdate(){
     //tickerSetApMode.update();
-    tickerCaculateSepeed.update();
+    tickerCaculateSpeed.update();
     SetPWMspeed.update();
     SetPWMStopSpeed.update();
     tickerSetApMode.update();
@@ -580,7 +580,7 @@ bool connectToWifi(String nssid, String npass, String ip, String ipsend) {
 
     if (testWifi(nssid, npass)) {
         ECHOLN("clearing eeprom");
-        for (int i = 0; i < EEPROM_WIFI_MAX_CLEAR; ++i){ 
+        for (int i = 0; i < EEPROM_WIFI_IP_SEND_END; i++){ 
             EEPROM.write(i, 0); 
         }
         ECHOLN("writing eeprom ssid:");
@@ -762,14 +762,7 @@ void setup() {
     digitalWrite(ledTestWifi, HIGH);
     ECHOLN("");
     ECHOLN("START!!!");
-    setmoderunbegin = char(EEPROM.read(EEPROM_SET_MODE_RUN_BEGIN));
-    ECHOLN(setmoderunbegin);
-    if(setmoderunbegin != 1 && setmoderunbegin != 2 && setmoderunbegin != 3){
-        setmoderunbegin = 1;
-        ECHOLN("read EEPROM fail, auto set 1!");
-    }else{
-        ECHO("read EEPROM done: ");
-    }
+
 
     SetupNomalMode();
 
@@ -782,6 +775,16 @@ void setup() {
     attachInterrupt(digitalPinToInterrupt(inputFG), inputSpeed, FALLING);
     attachInterrupt(digitalPinToInterrupt(hallSensor3), dirhallSensor3, RISING);
     // attachInterrupt(digitalPinToInterrupt(BUTTON), buttonClick, RISING);
+
+    setmoderunbegin = char(EEPROM.read(EEPROM_SET_MODE_RUN_BEGIN));
+    ECHOLN(setmoderunbegin);
+    if(setmoderunbegin != 1 && setmoderunbegin != 2 && setmoderunbegin != 3){
+        setmoderunbegin = 1;
+        ECHOLN("read EEPROM fail, auto set 1!");
+    }else{
+        ECHO("read EEPROM done: ");
+    }
+
 
     if(EEPROM.read(EEPROM_DISTANT) != 255 && EEPROM.read(EEPROM_DISTANT) != 0){
         isSaveDistant = true;
