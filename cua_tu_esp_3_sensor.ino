@@ -41,13 +41,14 @@ void setModeRunBegin(){
     ECHOLN("--------------");
     if (rootData.success()){
         String setmoderunstr = rootData["setmoderun"];
-        if(setmoderunstr == "1"){
-            setmoderunbegin = 1;
-        }else if(setmoderunstr == "2"){
-            setmoderunbegin = 2;
-        }else if(setmoderunstr == "3"){
-            setmoderunbegin = 3;
-        }
+        // if(setmoderunstr == "1"){
+        //     setmoderunbegin = 1;
+        // }else if(setmoderunstr == "2"){
+        //     setmoderunbegin = 2;
+        // }else if(setmoderunstr == "3"){
+        //     setmoderunbegin = 3;
+        // }
+        setmoderunbegin = setmoderunstr.toInt();
         ECHO("Writed: ");
         ECHOLN(setmoderunbegin);
         EEPROM.write(EEPROM_SET_MODE_RUN_BEGIN, char(setmoderunbegin));
@@ -407,41 +408,98 @@ void setpwmStopMotor(){
 
 void setpwmMotor(){
     countSetPwm++;
-    if(setmoderunbegin == 1){
-        if(modeFast == false){ //ti le PWM la 3 HIGH 1 LOW
-            if(countSetPwm <= 1){
-                digitalWrite(PWM, LOW);
-            }else{
+    switch(setmoderunbeginchange){
+        case 1:{
+            if(modeFast == false){ //ti le PWM la 3 HIGH 1 LOW
+                switch (countSetPwm){
+                    case 1: {
+                        digitalWrite(PWM, HIGH);
+                        break;
+                    }
+                    case 5: {
+                        digitalWrite(PWM, LOW);
+                        countSetPwm = 0;
+                        break;
+                    }
+                }
+            }else{                //ti le PWM la 1 HIGH 3 LOWset
                 digitalWrite(PWM, HIGH);
-                countSetPwm = 0;
             }
-        }else{                //ti le PWM la 1 HIGH 3 LOWset
-            digitalWrite(PWM, HIGH);
+            break;
         }
-    }
-    else if(setmoderunbegin == 2){
-        if(modeFast == false){ //ti le PWM la 3 HIGH 1 LOW
-            if(countSetPwm <= 2){
-                digitalWrite(PWM, LOW);
-            }else{
+        case 2:{
+            if(modeFast == false){ //ti le PWM la 3 HIGH 1 LOW
+                switch (countSetPwm){
+                    case 1: {
+                        digitalWrite(PWM, HIGH);
+                        break;
+                    }
+                    case 4: {
+                        digitalWrite(PWM, LOW);
+                        break;
+                    }
+                    case 5: {
+                        countSetPwm = 0;
+                        break;
+                    }
+                }
+            }else{                //ti le PWM la 1 HIGH 3 LOW
                 digitalWrite(PWM, HIGH);
-                countSetPwm = 0;
-            }
-        }else{                //ti le PWM la 1 HIGH 3 LOW
-            digitalWrite(PWM, HIGH);
-        } 
-    }
-    else if(setmoderunbegin == 3){
-        if(modeFast == false){ //ti le PWM la 3 HIGH 1 LOW
-            if(countSetPwm <= 3){
-                digitalWrite(PWM, LOW);
-            }else{
+            } 
+            break;
+        }
+        case 3:{
+            if(modeFast == false){ //ti le PWM la 3 HIGH 1 LOW
+                switch (countSetPwm){
+                    case 1: {
+                        digitalWrite(PWM, HIGH);
+                        break;
+                    }
+                    case 3: {
+                        digitalWrite(PWM, LOW);
+                        break;
+                    }
+                    case 5: {
+                        countSetPwm = 0;
+                        break;
+                    }
+                }
+
+
+                // if(countSetPwm == 1){
+                //     digitalWrite(PWM, LOW);
+                // }else if(countSetPwm == 3){
+                //     digitalWrite(PWM, HIGH);
+                // }else if(countSetPwm == 4){
+                //     countSetPwm = 0;
+                // }
+            }else{                //ti le PWM la 1 HIGH 3 LOW
                 digitalWrite(PWM, HIGH);
-                countSetPwm = 0;
-            }
-        }else{                //ti le PWM la 1 HIGH 3 LOW
-            digitalWrite(PWM, HIGH);
-        } 
+            } 
+            break;
+        }
+        case 4:{
+            if(modeFast == false){ //ti le PWM la 3 HIGH 1 LOW
+                switch (countSetPwm){
+                    case 1: {
+                        digitalWrite(PWM, HIGH);
+                        break;
+                    }
+                    case 2: {
+                        digitalWrite(PWM, LOW);
+                        break;
+                    }
+                    case 5: {
+                        countSetPwm = 0;
+                        break;
+                    }
+                }
+            }else{                //ti le PWM la 1 LOW 4 HIGH
+                digitalWrite(PWM, HIGH);
+            } 
+            break;
+        }
+
     }
 
 }
@@ -745,6 +803,62 @@ void setupIP(){
     WiFi.config(ip, gateway, subnet);
 }
 
+void setSpeecControl(){
+    // ECHOLN(countPulFGDistant > (percentLowSpeedOut/100)*countPulDistant);
+    // if(fristRun == false && Forward == true && countPulFGDistant < ((100 - (float)percentLowSpeedOut)/100)*countPulDistant){
+    //     modeFast = true;
+    // }else if(fristRun == false && Forward == false && countPulFGDistant > ((float)percentLowSpeedIn/100)*countPulDistant){
+    //     modeFast = true;       
+    // }else{
+    //     modeFast = false;
+    // }
+
+    if(fristRun == false && Forward == true){
+        if(countPulFGDistant < int(((100 - (float)percentLowSpeedOut)/100)*countPulDistant - (2*(setmoderunbegin - 1)))){
+            modeFast = true;
+        }else if(countPulFGDistant > int(((100 - (float)percentLowSpeedOut)/100)*countPulDistant)){
+            setmoderunbeginchange = setmoderunbegin;
+            modeFast = false;
+        }else if(countPulFGDistant == int(((100 - (float)percentLowSpeedOut)/100)*countPulDistant - 2*(setmoderunbegin - 1))){
+            modeFast = false;
+            // countSetPwm = 0;
+            setmoderunbeginchange = 1;
+        }
+        else if(setmoderunbeginchange != 2 && countPulFGDistant == int(((100 - (float)percentLowSpeedOut)/100)*countPulDistant - 2*(setmoderunbegin - 1) + 2)){
+            modeFast = false;
+            countSetPwm = 0;
+            setmoderunbeginchange = 2;
+        }
+        else if(setmoderunbeginchange != 3 && countPulFGDistant == int(((100 - (float)percentLowSpeedOut)/100)*countPulDistant - 2*(setmoderunbegin - 1) + 4)){
+            modeFast = false;
+            countSetPwm = 0;
+            setmoderunbeginchange = 3;
+        }
+    }
+    else if(fristRun == false && Forward == false){
+        if(countPulFGDistant > int(((float)percentLowSpeedIn/100)*countPulDistant + (2*(setmoderunbegin - 1)))){
+            modeFast = true;
+        }else if(countPulFGDistant < int(((float)percentLowSpeedIn/100)*countPulDistant)){
+            setmoderunbeginchange = setmoderunbegin;
+            modeFast = false;
+        }
+        else if(countPulFGDistant == int(((float)percentLowSpeedIn/100)*countPulDistant + (2*(setmoderunbegin - 1)))){
+            modeFast = false;
+            // countSetPwm = 0;
+            setmoderunbeginchange = 1;
+        }
+        else if(setmoderunbeginchange != 2 && countPulFGDistant == int(((float)percentLowSpeedIn/100)*countPulDistant + (2*(setmoderunbegin - 1)) - 2)){
+            modeFast = false;
+            countSetPwm = 0;
+            setmoderunbeginchange = 2;
+        }
+        else if(setmoderunbeginchange != 3 && countPulFGDistant == int(((float)percentLowSpeedIn/100)*countPulDistant + (2*(setmoderunbegin - 1)) - 4)){
+            modeFast = false;
+            countSetPwm = 0;
+            setmoderunbeginchange = 3;
+        }
+    }
+}
 
 void setup() {
     // put your setup code here, to run once:
@@ -777,10 +891,12 @@ void setup() {
     // attachInterrupt(digitalPinToInterrupt(BUTTON), buttonClick, RISING);
 
     setmoderunbegin = char(EEPROM.read(EEPROM_SET_MODE_RUN_BEGIN));
+    setmoderunbeginchange = setmoderunbegin;
     ECHOLN(setmoderunbegin);
-    if(setmoderunbegin != 1 && setmoderunbegin != 2 && setmoderunbegin != 3){
-        setmoderunbegin = 1;
-        ECHOLN("read EEPROM fail, auto set 1!");
+    if(setmoderunbegin != 1 && setmoderunbegin != 2 && setmoderunbegin != 3 && setmoderunbegin != 4 && setmoderunbegin != 5){
+        setmoderunbegin = 3;
+        setmoderunbeginchange = setmoderunbegin;
+        ECHOLN("read EEPROM fail, auto set 3!");
     }else{
         ECHO("read EEPROM done: ");
     }
@@ -803,8 +919,8 @@ void setup() {
         ECHO(time_return);
         ECHOLN("0 (ms)");
     }else{
-        time_return = 10;
-        ECHOLN("isSetTimeReurn fasle, auto set 100(ms)");
+        time_return = 20;
+        ECHOLN("isSetTimeReurn fasle, auto set 200(ms)");
     }
 
     if(EEPROM.read(EEPROM_SET_PERCENT_OUT_LOW_SPEED) != 255 && EEPROM.read(EEPROM_SET_PERCENT_OUT_LOW_SPEED) != 0
@@ -824,6 +940,13 @@ void setup() {
 
     valueAnalogRead = analogRead(ANALOGREADBUTTON);
     prevalueAnalogRead = valueAnalogRead;
+
+    ECHOLN("--------------------");
+    ECHOLN(int(((100 - (float)percentLowSpeedOut)/100)*countPulDistant - 2*(setmoderunbegin - 1)));
+    ECHOLN(int(((100 - (float)percentLowSpeedOut)/100)*countPulDistant));
+    ECHOLN(int(((100 - (float)percentLowSpeedOut)/100)*countPulDistant - 2*(setmoderunbegin - 1) + 2));
+    ECHOLN(int(((100 - (float)percentLowSpeedOut)/100)*countPulDistant - 2*(setmoderunbegin - 1) + 4));
+
 }
 
 
@@ -833,14 +956,13 @@ void loop() {
     tickerupdate();
     server.handleClient();
 
-    // ECHOLN(countPulFGDistant > (percentLowSpeedOut/100)*countPulDistant);
-    if(fristRun == false && Forward == true && countPulFGDistant < ((100 - (float)percentLowSpeedOut)/100)*countPulDistant){
-        modeFast = true;
-    }else if(fristRun == false && Forward == false && countPulFGDistant > ((float)percentLowSpeedIn/100)*countPulDistant){
-        modeFast = true;       
-    }else{
-        modeFast = false;
-    }
+
+    
+    setSpeecControl();      //dieu khien van toc cham dan deu
+
+
+
+
 
     if (Flag_Normal_Mode == true && WiFi.status() != WL_CONNECTED){
         digitalWrite(ledTestWifi, HIGH);

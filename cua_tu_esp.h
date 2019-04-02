@@ -71,7 +71,8 @@ ESP8266WebServer server(HTTP_PORT);
 
 int countPulFG = 0;
 int countPulFGDistant = 0;
-int setmoderunbegin = 1; // cham nhat
+int setmoderunbegin = 1; // nhanh nhat
+int setmoderunbeginchange = 1;      //bien nay co tac dung thay doi toc do cham dan
 uint32_t countPulDistant;                                 
 uint8_t countSetPwm = 0;        //bien nay co tac dung dieu chinh toc do dong co
 uint32_t countTime = 0;          //tinh thoi gian, timer 2 la 10us, vi the 100ms bien nay se co gia tri la 10.000
@@ -142,7 +143,7 @@ void resetDistant();
 void setTimeReturn();
 void SetupNomalMode();
 void SetupNetwork();
-
+void setSpeecControl();
 //config mode
 void setLedApMode();
 void SetupConfigMode();             //phat wifi
